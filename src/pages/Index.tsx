@@ -154,6 +154,9 @@ export default function Index() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [editBio, setEditBio] = useState(false);
   const [bioInput, setBioInput] = useState("");
+  const [editName, setEditName] = useState(false);
+  const [nameInput, setNameInput] = useState("");
+  const [usernameInput, setUsernameInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -552,34 +555,70 @@ export default function Index() {
                     <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
                   </div>
 
-                  <div className="flex-1">
-                    <h3 className="text-base font-semibold text-gray-900">{currentUser.name}</h3>
-                    <p className="text-sm text-gray-400">@{currentUser.username}</p>
-
-                    {editBio ? (
-                      <div className="mt-2 flex gap-2">
+                  <div className="flex-1 min-w-0">
+                    {/* Name */}
+                    {editName ? (
+                      <div className="space-y-2 mb-2">
                         <Input
-                          value={bioInput}
-                          onChange={e => setBioInput(e.target.value)}
-                          placeholder="О себе..."
-                          className="h-8 text-xs border-gray-200 rounded-xl"
-                          onKeyDown={e => {
-                            if (e.key === "Enter") {
-                              setCurrentUser(u => ({ ...u, bio: bioInput }));
-                              setEditBio(false);
-                            }
-                          }}
+                          value={nameInput}
+                          onChange={e => setNameInput(e.target.value)}
+                          placeholder="Имя"
+                          className="h-8 text-sm font-semibold border-gray-200 rounded-xl"
                         />
-                        <Button onClick={() => { setCurrentUser(u => ({ ...u, bio: bioInput })); setEditBio(false); }} className="h-8 px-3 bg-gray-900 text-white rounded-xl text-xs">Сохранить</Button>
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm text-gray-400 shrink-0">@</span>
+                          <Input
+                            value={usernameInput}
+                            onChange={e => setUsernameInput(e.target.value.replace(/\s+/g, "").toLowerCase())}
+                            placeholder="никнейм"
+                            className="h-8 text-sm border-gray-200 rounded-xl"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => {
+                              if (nameInput.trim()) setCurrentUser(u => ({ ...u, name: nameInput.trim(), username: usernameInput || u.username }));
+                              setEditName(false);
+                            }}
+                            className="h-7 px-3 bg-gray-900 text-white rounded-xl text-xs"
+                          >Сохранить</Button>
+                          <Button variant="outline" onClick={() => setEditName(false)} className="h-7 px-3 rounded-xl text-xs border-gray-200 text-gray-500">Отмена</Button>
+                        </div>
                       </div>
                     ) : (
-                      <p
-                        className="text-sm text-gray-500 mt-2 cursor-pointer hover:text-gray-700 transition-colors"
-                        onClick={() => { setBioInput(currentUser.bio); setEditBio(true); }}
-                        title="Нажмите, чтобы изменить"
-                      >
-                        {currentUser.bio} <span className="text-gray-300 text-xs">✎</span>
-                      </p>
+                      <div className="flex items-center gap-2 group">
+                        <h3 className="text-base font-semibold text-gray-900">{currentUser.name}</h3>
+                        <button
+                          onClick={() => { setNameInput(currentUser.name); setUsernameInput(currentUser.username); setEditName(true); }}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 hover:text-gray-500"
+                        >
+                          <Icon name="Pencil" size={13} />
+                        </button>
+                      </div>
+                    )}
+                    {!editName && <p className="text-sm text-gray-400">@{currentUser.username}</p>}
+
+                    {/* Bio */}
+                    {!editName && (
+                      editBio ? (
+                        <div className="mt-2 flex gap-2">
+                          <Input
+                            value={bioInput}
+                            onChange={e => setBioInput(e.target.value)}
+                            placeholder="О себе..."
+                            className="h-8 text-xs border-gray-200 rounded-xl"
+                            onKeyDown={e => {
+                              if (e.key === "Enter") { setCurrentUser(u => ({ ...u, bio: bioInput })); setEditBio(false); }
+                            }}
+                          />
+                          <Button onClick={() => { setCurrentUser(u => ({ ...u, bio: bioInput })); setEditBio(false); }} className="h-8 px-3 bg-gray-900 text-white rounded-xl text-xs">OK</Button>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500 mt-1.5 cursor-pointer hover:text-gray-700 transition-colors flex items-center gap-1.5 group" onClick={() => { setBioInput(currentUser.bio); setEditBio(true); }}>
+                          <span>{currentUser.bio}</span>
+                          <Icon name="Pencil" size={11} className="text-gray-300 group-hover:text-gray-400 shrink-0" />
+                        </p>
+                      )
                     )}
 
                     <div className="flex gap-6 mt-4">
@@ -590,8 +629,9 @@ export default function Index() {
                   </div>
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-gray-50">
-                  <p className="text-xs text-gray-400 text-center">Нажмите на фото, чтобы загрузить аватарку</p>
+                <div className="mt-4 pt-4 border-t border-gray-50 flex items-center justify-center gap-1.5">
+                  <Icon name="Camera" size={13} className="text-gray-300" />
+                  <p className="text-xs text-gray-400">Нажмите на фото, чтобы сменить аватарку</p>
                 </div>
               </div>
 
